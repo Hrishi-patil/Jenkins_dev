@@ -1,0 +1,24 @@
+pipeline{
+    agent any 
+    stages{
+        stage('build') {
+            steps { 
+                //
+                echo "creating build using maven"
+            }
+        }
+        stage ('Test'){
+        steps { 
+            //
+            echo "Testing an code"
+            }
+        }
+    stage ('Deploy'){
+        steps {
+            //
+            echo "Deploying artifcat to production"
+        }
+    }
+    
+    }
+}

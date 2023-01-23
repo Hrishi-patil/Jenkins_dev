@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    stages {
+        stage('Continuous Download') 
+	 {
+     steps {
+        sh label: 'yum install git -y'
+        git 'https://github.com/sunildevops77/maven.git'
+        sh label: 'git init /var/lib/jenkins/workspace/sh-var/'
+
+    }	    
+	}
+
+stage('Continuous build') 
+   
+	 {
+	steps {
+        sh label: '', script: 'mvn package'
+    }
+	}
+
+stage('Continuous Deployment') 
+   
+	 {
+	steps {
+        sh label: '', script: 'scp  /var/lib/jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war  root@10.110.10.55:/var/lib/tomcat8/webapps/qaenv.war'
+    }
+	}
+stage('Continuous Testing') 
+   
+	 {
+        steps {
+            sh label: '', script: 'echo "Testing Passed"'
+        }
+	}
+stage('Continuous Delivery') 
+   
+	 {
+        steps {
+            sh label: '', script: 'scp  /home/ubuntu/.jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war  ubuntu@172.31.28.16:/var/lib/tomcat8/webapps/prodenv.war'
+
+        }
+	}
+}
+
+}
+
+    
