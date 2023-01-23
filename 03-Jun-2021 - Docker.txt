@@ -1,0 +1,61 @@
+Docker is a containerization tool.
+
+Virtualization -- Fixed hardware allocation.
+
+Containerization - No Fixed Hardware
+
+Process isolation ( Dependency in os is removed )
+
++++++++++++++++++++++++++
+
+In comparison to the traditional virtualization functionalities of hypervisors, 
+Docker containers eliminate the need for a separate guest operating system for every new virtual machine.
+
+Docker implements a high-level API to provide lightweight containers that run processes in isolation. 
+
+A Docker container enables rapid deployment with minimum run-time requirements. It also ensures better management and simplified portability.
+ This helps developers and operations team in rapid deployment of an application.
+
++++++++++++++++++++++++++
+Create Ubuntu Machine on AWS
+All Traffic - anywhere
+
+Connect using git bash
+
+https://get.docker.com/
+
+
+Go to Root Account
+$ sudo  su -
+# curl -fsSL https://get.docker.com -o get-docker.sh ( this will download shell script in the machine)
+
+# sh get-docker.sh  ( This will execute the shell script, which will install docker )
+
+
+How to check the docker is installed or not
+
+# docker --version
+
+
+We should be comformatable with four terms
+
+1) Docker Images   
+Combinations of binaries / libraries which are necessary for one software application.
+
+2) Docker Containers  
+When image is installed and in comes into running condition, it is called container.
+
+
+
+3) Docker Host
+Machine on which docker is installed, is called as Docker host.
+
+4) Docker Client
+Terminal used to run docker run commands ( Git bash )
+
+
+
+On linux machine, git bash will work like docker client.
+
+
++++++++++++++++++++++++++++

@@ -1,0 +1,357 @@
+https://cloud.google.com/
+Sign in using gmail
+
+Click on console
+You will enter into google cloud platform console
+Navigation Menu --- Kubernetes Engine --  Clusters -- Create cluster --  Create
+
+Observation: Cluster size is 3
+By default, it creates 3 node cluster.
+
+
+Master Machine is not provided as alinux server.
+It is given as a service.
+As it is a service, it never fail.
+So, we do not need to worry about master.
+
+To connect to the cluster
+-------------------------------
+In GCP, Cloud Shell is the terminal, used to connect to the cluster.
+
+kubectl get nodes    ( we can see the nodes )
+
+After practice,  Delete the cluster.
+Next day,  we can create the cluster again.
+-----------------------
+
+To Create pod 
+kubectl run --image tomcat webserver
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Kuberntes uses various types of objects.
+
+1 Pod:  This is a layer of abstraction on top of a container. This is the smallest object that kubernetes can work on. In the pod, we have the container. kubectl commands will work on the pod and pod communicates there instructions to the container.
+
+2. Service Object: This is used for port mapping and network load balancing.
+
+3. NameSpace: This is used for creating partitions in the cluster. Pods running in  a namespace cannot communicate with other pods running in other namespace.
+
+4. Secrets: This is used for passing encrypted data to the pods.
+
+5. ReplicaSet / Replication COntroller: This is used for managing multiple replicas of a pod to perform activities like load balancing and autoscaling.
+
+6. Deployment: This is used for performing all activites that a ReplicaSet can do. It can also handle rollling updates.
+
+Create Cluster.
+Open cloud shell terminal.
+
+Command to create a pod
+-----------------------------
+
+kubectl run --image tomcat webserver
+( Webserver is pod name )
+
+To see list of pods
+------------------------
+kubectl get pods
+
+If we do not specify replicas, it creates only one replica.
+
+To delete the pod
+--------------------
+ kubectl delete pods webserver
+
+
+Lets create pod again
+-----------------------
+kubectl run --image tomcat webserver
+
+
+
+
+
+To know on which node, this pod is running
+
+
+
+
+kubectl get pods -o wide
+( o - stands for output )
+
+-------------------------
+But, Kubernetes performs container orchestration by using definition files. Definition files are yml files 
+
+Definition file, will have 4 top level elements
+
+1. apiVersion:
+2. kind:
+3. metadata:
+4. spec: 
+
+
+
+apiVersion:
+---------------
+Depending on kubernetes object we want to create, there is corresponding code library we want to use.
+
+apiVersion referes to code library
+
+Kind     			apiVersion
+========================
+Pod       			v1
+Replication COntroller	v1
+Service   			v1
+NameSpace     		v1
+Secrets         		v1
+RepliaSet       		apps/v1
+Deployment      		apps/v1
+
+
+
+
+
+kind:
+----------
+Refers to kubernetes object which we want to create.
+Ex: Pod, Replicaset, service etc
+
+metadata:
+-----------
+Additional information about the kubernets object
+like name, labels  etc
+
+spec:
+------
+Contains docker container related information like image name, environment variables, port mapping etc.
+
+
+
+
+
+
+
+
++++++++++++++++++++++++++++++++++++++++++
+
+Connect to cluster by using cloud shell.
+
+$ mkdir demofiles
+$ cd demofiles
+
+
+
+
+Ex1:  Create a pod definition file to start nginx in a pod. 
+Name the pod as nginx-pod, name the container as appserver. 
+
+cat > pod-definition1.yml
+
+
+vim pod-definition1.yml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: nginx-pod
+ labels:
+  author: sunil
+  type: reverse-proxy
+spec:
+ containers: 
+  - name: appserver
+    image: nginx
+
+:wq
+
+
+
+
+
+
+Command to run the definition file
+------------------------------------------
+kubectl create -f pod-definition1.yml
+
+
+
+
+
+
+
+
+Pod is created.
+
+
+
+
+
+
+To get the list of pods
+---------------------------
+kubectl get pods
+
+
+To get the list of pods along with IP address  and which node the pod is running
+---------------------------
+kubectl get pods -o wide  
+
+
+To delete the pod created from the above file
+---------------------
+kubectl delete -f  pod-definition1.yml
+
+
+++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++
+ReplicationController:
+This is an high level object used for handling multiple replicas of a specific pod. 
+Here we can perform load balancing and scalling.
+
+ReplicationController uses keys like replicas, template" etc in the "spec" section.
+
+In template section we can give metadata related to the pod and also use another spec section where we can give containers information.
+
+Ex: Create  a replication controller for creating 3 replicas of httpd
+
+cat > replication-controller.yml
+
+
+vim  replication-controller.yml
+
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+ name: httpd-rc
+ labels:
+  author: sunil
+spec:
+ replicas: 3
+ template:
+  metadata:
+   name: httpd-pod
+   labels:
+    author: sunil
+  spec:
+   containers:
+    - name: myhttpd
+      image: httpd
+      ports:
+       - containerPort: 80
+         hostPort: 8080
+
+
+:wq
+
+
+kubectl delete --all pods   ( To delete all the existing pods )
+
+kubectl  get pods  ( No pods available )
+
+Open the port
+-------------------
+gcloud compute firewall-rules create rule21 --allow tcp:8080
+
+kubectl create -f replication-controller.yml
+
+kubectl  get pods  ( We should get 3 pods )
+
+kubectl  get pods -o wide ( Observation , 3 pods are distributed in 3 nodes )
+
+kubectl  get nodes -o wide
+
+
+Take external IP ( Public IP )  of any node
+35.239.250.215:8080
+34.136.211.97:8080
+
+
+
+To delete the replicas
+kubectl delete -f replication-controller.yml
+
+
+++++++++++++++++++++++++++
+
+ReplicaSet
+---------------
+
+Pod is the smallest kubernetes object, which we worked on.
+Next Level is replication controller.
+ReplicaSet is similar to replication controller.
+In replicatSet, we have an additional field in spec section called as "selector" field.
+
+This selector uses a child element called "matchLabels"   , where it will search for pods based on a 
+specific label name, and adds them to the cluster.
+
+Ex: Create a replicaset file to start 4 tomcat replicas and then perform scaling  
+
+cat > replica-set.yml
+
+vim replica-set.yml
+
+
+
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+ name: tomcat-rs
+ labels:
+  type: webserver
+  author: sunil
+spec:
+ replicas: 4
+ selector:
+  matchLabels:
+   type: webserver
+ template:
+  metadata:
+   name: tomcat-pod
+   labels:
+    type: webserver
+  spec:
+   containers:
+    - name: mywebserver
+      image: tomcat
+      ports:
+       - containerPort: 8080
+         hostPort: 9090
+
+ 
+:wq
+
+
+kubectl create -f replica-set.yml
+
+
+kubectl  get pods  ( We should get 4 pods )
+
+kubectl  get replicaset
+
+Lets perform scaling from 4 pods to 6 pods
+
+Option 1: We can open the definition file and make changes in the code from 4 to 6 in replicas field.
+
+vim replica-set.yml
+
+Now, we should not use create commands, we should use replace command.
+
+kubectl replace -f replica-set.yml
+
+kubectl  get pods  ( We should get 6 pods )
+
+Option 2: 
+
+kubectl scale --replicas=2 -f replica-set.yml
+
+kubectl  get pods  ( We should get 2 pods )
+
+ 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+

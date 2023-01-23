@@ -1,0 +1,223 @@
+
+Ex:  Create a dockerfile, for using ubuntu as base image, and install java in it.
+Download jenkins.war  and make execution of "java -jar jenkins.war" as the default process.
+
+Every docker image come with default process.
+As long as default process is running, the container will be running condition.
+
+The moment, the default process is closed, the container will be exited.
+
+Lets remove all the container
+# docker rm -f $(docker ps -aq)
+ 
+
+Observation 1:
+When we start ubuntu container, we use below command
+# docker run --name  c1  -it  ubuntu
+
+/# 
+
+To comeout of the container we use  Ctrl + p + q
+
+# docker container ls
+( our container c1  is running in the background )
+
+Observation 2:
+When we start jenkins container, we use below command
+# docker run --name j1  -d  -P    jenkins/jenkins
+
+
+Now, I want to open interactive terminal to enter jenkins
+# docker  exec -it  j1  bash
+
+
+( In ubuntu container, I can directly go into -it terminal,
+where as in jenkins i am running an additional command  exec ? )
+
+
+Lets try to go to interactive  terminal  in docker run command )
+# docker run  --name  j2  -it  jenkins/jenkins
+( we are not getting interactive terminal )
+
+
+
+I want to run tomcat as container
+# docker run  --name   t1  -d   -P   tomee
+
+
+Lets find the reason
+-----------------------
+docker container ls  ( to see the list of containers )
+
+Observer the command section.
+It tells you the default process that gets executed, when we start the container.
+
+Container			Default process 
+tomcat			catalina.sh
+jenkins			/bin/tini
+ubuntu			/bin/bash
+
+bash -- is nothing but the terminal.
+
+For linux based container, the default process is shell process 
+( ex of shell process are  bash shell, bourne shell etc )
+
+Hence we are able to enter -it mode  in ubuntu )
+
+
+
+We are trying to change the default process of the container.
+-------------------------------------------------------------
+
+# vim dockerfile
+
+FROM ubuntu
+MAINTAINER logiclabs
+
+RUN apt-get update
+RUN apt-get install -y default-jdk
+
+ADD http://mirrors.jenkins.io/war-stable/latest/jenkins.war  /
+ENTRYPOINT ["java","-jar","jenkins.war"]
+
+:wq
+
+Build an image from the dockerfile
+# docker build -t  myubuntu  .
+
+TO see the list of images  ( we can see our new image )
+# docker image ls
+
+TO start container from new image
+# docker run  myubuntu     ( Observe the logs generated on the 
+screen, we got logs related to jenkins , jenkins is fully up and running )
+
+Its an ubuntu container, it is behaving as a jenkins container )
+
+Ctrl +c
+
+RUn the below command
+# docker ps -a
+
+For myubuntu   the command is  java -jar  jenkins.war
+For  ubuntu    the commans is     /bin/bash
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Working on docker registry
+Registry is a location where docker images are saved.
+Types of registry
+1) public registry
+2) private registry
+
+public registry is hub.docker.com
+Images uploaded here are available for everyone.
+
+
+Usecase: Create a customized ubuntu image, by installing  tree in it.
+
+Save this container as an image, and upload this image in docker hub.
+
+Step 1: Create a new account in hub.docker.com
+
+Step 2: Creating our own container
+# docker run --name  c5 -it  ubuntu
+
+Lets install tree package in this container
+/# apt-get update
+/#  apt-get  install tree
+/# exit
+
+Step 3: Save the above container as an image
+# docker commit  c5  sunildevops77/ubuntu_img291  
+( sunildevops77/ubuntu_img291  -- is the image name )
+
+Note: Image name should start with docker_id/
+
+To see the list of images
+# docker image ls  ( we can see the new image )
+
+TO upload the image to hub.docker.com  ( docker login command is used )
+-------------------------------------------
+# docker login   ( provide docker_id and password )
+
+To upload the image
+# docker push  <image_name>
+# docker push sunildevops77/ubuntu_img291
+
+login to docker hub to see your image
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Container orchestration
+------------------------
+This is the process of running docker containers in a distributed environment, on multiple docker host machines.
+All these containers can have a single service running on them and they share the resources between eachother, even running on different host machines.
+
+Docker swarm is the tool used for performing container orchestration
+
+
+Advantages
+--------------
+1) Load balancing
+2) scaling of containers
+3) performing rolling updates
+4) handling failover scenarios
+
+ 
++++++++++++++++++++++++++++++
+
+Machine on which docker swarm is installed is called as manager.
+Other machines are called as workers.
+
+
+Lets create 3 machines
+Name is as Manager, Worker1, Worker2
+
+All the above machines should have docker installed in it.
+Install docker using get.docker.com
+
+( Optional step to change the  prompt )
+After installing docker in the 1st machine ( Manager ),  Lets change the host name.
+Host name will be available in the file hostname. We will change the hostname to manager.
+
+# vim /etc/hostname
+Manager
+
+:wq
+
+After changing the hostname, lets restart the machine
+# init 6
+
++++++++++++++++++++++++++++
+Similary repeat the same in worker1 and worker2
+
+++++++++++++++++++++++++++++++++++++
+Connect to Manager, install docker swarm in it.
+
+$ sudo su -
+
+Command to install docker swarm  in manager machine
+
+# docker swarm init --advertise-addr  private_ip_of_manager
+# docker swarm init --advertise-addr  172.31.27.151
+
+Please read the log messages
+
+Now, we need to add workers to manager
+Copy the  docker swarm join command in the log and run in the worker1  and worker2
+
+Open another gitbash terminal, connect to worker1
+
+sudo su -
+
+# docker swarm join --token SWMTKN-1-0etsmfa26vreeytq278q8ohhi73il7j1lpnrzzlowuld1r8yex-9x04pjmiq85jxjzjayzlglh1c 172.31.27.151:2377
+
+Repeat for worker2
+
++++++++++++++++++++++++++++++
+TO see the no of nodes from the manager
+
+Manager # docker  node ls   ( we can see manager, worker1  and worker 2)
+

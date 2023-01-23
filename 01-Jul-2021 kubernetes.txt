@@ -1,0 +1,599 @@
+
+
+Ex 2:
+---------
+vim pod-definition2.yml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: postgres-pod
+ labels:
+  author: sunil
+  type: database
+spec:
+ containers:
+  - name: mypostgres
+    image: postgres
+    env:
+     - name: POSTGRES_PASSWORD
+       value: durgasoft
+     - name: POSTGRES_USER
+       value: myuser
+     - name: POSTGRES_DB
+       value: mydb
+
+:wq
+
+      
+Command to run the definition file
+------------------------------------------
+kubectl create -f pod-definition2.yml
+
+
+To get the list of pods
+---------------------------
+kubectl get pods
+
+
+To get the list of pods along with IP address  and which node the pod is running
+---------------------------
+kubectl get pods -o wide
+
+
+TO get more details about the pod
+-----------------------------------------
+kubectl describe pods  postgres-pod
+
+or
+
+kubectl describe pods  postgres-pod | less
+
+
+Ex3:  
+
+vim pod-definition3.yml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: jenkins-pod
+ labels:
+  author: sunil
+  ci: cd
+spec:
+ containers:
+  - name: myjenkins
+    image: jenkins/jenkins
+    ports:
+     - containerPort: 8080
+       hostPort: 8080
+
+:wq
+
+
+
+
+How to open the port?
+-----------------------------
+gcloud compute firewall-rules create rule35 --allow tcp:8080 
+
+
+gcloud compute firewall-rules create rule2 --allow tcp:9090
+
+
+kubectl create -f pod-definition3.yml
+
+kubectl get pods -o wide
+
+Take a note on the node in which the pod is running.
+
+
+gke-cluster-1-default-pool-9fb99245-q1nm
+
+
+TO get the list of nodes
+-----------------------
+kubectl get nodes -o wide
+
+Take the external IP of the node
+
+35.223.183.189:8080
+34.68.242.87:8080
+
+
+Open browser  ( chrome)
+
+35.223.183.189:8080   ( we should get the jenkins page )
+
+
+
+++++++++++++++++++++++++
+
+
+
+
+
+Deployment Object
+-------------------------
+This is also an high level object which can be used for scalling, load balancing and perform rolling updates.
+
+Create a deployment file to run nginx 1.7.9 with 3 replicas. 
+Later perform a rolling update to nginx 1.9.1 
+
+
+vim deployment.yml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-deployment
+ labels:
+  author: sunil
+  type: proxyserver
+spec:
+ replicas: 3
+ selector:
+  matchLabels:
+   type: proxyserver
+ template:
+  metadata:
+   name: nginx-pod
+   labels:
+    type: proxyserver
+  spec:
+   containers:
+    - name: nginx
+      image: nginx:1.7.9
+      ports:
+       - containerPort: 80
+         hostPort: 8888
+ 
+
+:wq
+
+kubectl get all  ( we have one   default service running )
+
+kubectl create -f deployment.yml
+
+TO check, if the deployment is created or not
+--------------------------------------------
+kubectl get deployment ( we can see 1 deployment object )
+
+
+
+
+kubectl get pods  ( we should get 3 pods )
+
+
+
+We can anyways perform scaling, apart from that we can perform rolling updates.
+
+kubectl get all  (  we get all the objects )
+Take a note of the full name of the deployment object
+
+ 
+deployment.apps/nginx-deployment
+
+
+To perform rolling update
+-----------------------------
+
+kubectl --record deployment.apps/nginx-deployment  set image deployment.v1.apps/nginx-deployment nginx=nginx:1.9.1
+
+We get a message ( image updated )
+
+kubectl get pods
+To know more about pod
+------------------------
+kubectl describe pods podname
+
+nginx-deployment-6fdc797dc6-qrlqb
+
+
+
+kubectl describe pods nginx-deployment-6fdc797dc6-qrlqb | less
+
+we can see as Image: nginx:1.9.1
+
+
+:q
+( It will take some time )
+
+kubectl  get pods
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++
+
+
+
+Service Object
+-----------------------
+This is used for network load balancing and port mapping.
+Service Object uses 3 ports
+1. Target port -  Its is pod or container port 
+2. port - Refers to service port.
+3. hostPort -  Refers to host machine port to make it accessable from external network.
+
+
+
+Service Objects are classified into 3 types
+
+1. clusterIP: This is default type of service object used in kubermetes and it is used when we want the pods in the cluster to communicate with each other and not with external network.
+
+
+2. nodePort: This is used, if we want to access the pods from an external network and it also performs network load balancing. ie Even if a pod is running on a specific slave, we can access it from other slave in the cluster.
+
+
+3. LoadBalancer:    This is similar to nodePort. It is used for external connectivity of a pod and also network load balancing and it also assigns a  public ip for all the nodes  combined together.
+
++++++++++++++++++++++++
+
+
+vim pod-definition1.yml
+
+We will be creating a service object for the labels used in pod-definition1.yml
+
+kubectl create -f pod-definition1.yml
+
+As we know by pod will be created using the above command.
+
+We want to create service object for the above pod
+
+Ex: Create a service definition file for port mapping on nginx pod
+
+vim pod-definition1.yml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: nginx-pod
+ labels:
+  author: sunil
+  type: reverse-proxy
+spec:
+ containers: 
+  - name: appserver
+    image: nginx
+
+:wq
+
+kubectl create -f pod-definition1.yml
+
+Observation: Along with the pod, service object gets created.
+This service object is type clusterIP. Hence cannot be accessed from external network.
+
+
+gcloud compute firewall-rules create rule3 --allow tcp:30008
+
+vim service1.yml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: nginx-service
+ labels:
+  author: sunil
+spec:
+ type: NodePort
+ ports:
+  - targetPort: 80
+    port: 80
+    nodePort: 30008
+ selector:
+  author: sunil
+  type: reverse-proxy
+... 
+
+:wq
+
+ 
+kubectl create -f service1.yml
+
+Now, the nginx pod is accessable externally
+
+kubectl get nodes -o wide
+
+As we have created nodePort, we should able to access from any node.
+
+Take external_IP  from anynode
+
+34.66.234.81:30008   ( We should be able to access nginx )
+
+34.123.230.145:30008
+
+
+
+If service object is not created,  we used to identify in which node the pod is running, take that node IP, from that node IP, we used to access that application.
+
+( Note: We need to open 30008 port in cluster )
+
+++++++++++++++++++++++
+
+
+Kubernetes Project
+---------------
+This is a python based application which is used for accepting a vote ( voting app ).
+This application accepts the vote and passes it to temporary db created using redis. From redis, the data is passed to worker application created using dotnet. Dotnet based application analyses the data and stores it in permanant database created using postgres.
+From postgres database, results can be seen on an application created using node JS.
+
+    
+Have a look at the project Architecture.
+
+Redis and postgres pod needs to assigned as cluster IP.
+As cluster Ip is used for internal communication.
+
+Voting App and Result App needs to be assigned as loadbalance type.
+
+We need to create 5 definition files.
+
+These 5 images related to this project is available in hub.docker.com
+Using those images, we will create pods.
+We need to create 5 pod definition files
+We need to create 4 service files
+
+We will be creating these definition files using pycharm.
+
+
+ 
+vim voting-app-pod.yml
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: voting-app-pod
+  labels:
+    name: voting-app-pod
+    app: demo-voting-app
+spec:
+  containers:
+    - name: voting-app
+      image: dockersamples/examplevotingapp_vote
+      ports:
+        - containerPort: 80
+...
+
+
+:wq
+
+
+vim result-app-pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: result-app-pod
+  labels:
+    name: result-app-pod
+    app: demo-voting-app
+spec:
+ containers:
+   - name: result-app
+     image: dockersamples/examplevotingapp_result
+     ports:
+       - containerPort: 80
+...
+
+
+:wq
+
+
+
+vim worker-app-pod.yml
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: worker-app-pod
+  labels:
+    name: worker-app-pod
+    app: demo-voting-app
+spec:
+  containers:
+   - name: worker-app
+     image: dockersamples/examplevotingapp_worker
+...
+
+
+:wq
+
+
+vim redis-pod.yml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-pod
+  labels:
+    name: redis-pod
+    app: demo-voting-app
+spec:
+  containers:
+   - name: redis
+     image: redis
+     ports:
+      - containerPort: 6379
+...
+
+
+:wq
+
+
+
+vim postgres-pod.yml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres-pod
+  labels:
+    name: postgres-pod
+    app: demo-voting-app
+spec:
+  containers:
+    - name: postgres
+      image: postgres:9.4
+      ports:
+        - containerPort: 5432
+...
+
+
+We are done with 5 pod definiton files.
+We need to create 4 service definiton files.
+
+
+vim redis-service.yml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  labels:
+    name: redis-service
+    app: demo-voting-app
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    name: redis-pod
+    app: demo-voting-app
+
+
+:wq
+
+Note: As we have not specified the type of service object, by default it creates service object to type Cluster_IP
+
+
+
+vim   result-app-service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: result-service
+  labels:
+    name: result-service
+    app: demo-voting-app
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    name: result-app-pod
+    app: demo-voting-app
+
+
+
+:wq
+
+
+The above two service objects are of type load balancer. we can access it from the external network.
+
+
+Open gitbash from the location where all the definition files are saved.
+
+$ git init
+$ git add .
+$ git commit -m "a"
+
+Open github ---> create new repository
+
+Repository name -  kuber_project
+
+upload the files from local repository to remote repository using the two commands
+
+$ git remote add  XXXXX
+$ git push XXXX
+
+We should able to see the definition files in github repository ( Total 9 files )
+
+We need to download the 9 files into kubernetes cluster.
+
+
+Login to GCP console
+Create kubernetes cluster
+Connect to the cluster
+
+Get the repository URL in github.
+
+$ git clone rep_url
+
+$ git clone https://github.com/sunildevops77/kube_project_durga.git
+
+
+( Observation all the definition files will be downloaded )
+
+$ cd kuber_project
+$ ls   ( we get the files )
+
+$ kubectl create -f  voting-app-pod.yml
+
+$ kubectl  get pods  ( we should get one pod )
+
+$ kubectl create -f  redis-pod.yml
+
+$ kubectl create -f  worker-app-pod.yml
+
+$ kubectl create -f postgres-pod.yml
+
+$  kubectl create -f result-app-pod.yml
+
+Now, we need to run service definition files
+
+$   kubectl create -f voting-app-service.yml
+
+$   kubectl create -f  redis-service.yml
+
+$   kubectl create -f postgres-service.yml
+
+$   kubectl create -f result-app-service.yml
+
+To get all the information
+
+$ kubectl get all
+
+We can see 5 pods and 4 services created.
+
+
+Observation: worker pod  also failed.
+
+++++++++++++++++++++++++++++
+
+These images are coming from community called dockersamples
+Connection between workerpod and postgresPod is creating issues.
+
+Go to service&ingress option in the kuberneted dashboard
+We can see the four services, which are created.
+
+
+Click on endpoint ( IP ) of voting Application
+Click in URL, we get Voting App ( CATS / DOGS )  -- This is python based App.
+
+Click on endpoint ( IP ) of result Application
+
+Click in URL, we get Result App
+ 
+
+++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+

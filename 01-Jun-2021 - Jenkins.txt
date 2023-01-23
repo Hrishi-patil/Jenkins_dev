@@ -1,0 +1,155 @@
++++++++++++++++++++++++++++++++++++++++++++
+Multibranch pipeline
+-------------------------
+When developer creates code for  multiple functionalities,  he will generally do that on separate branches.
+Every branch will contains specific code related to one functionality.
+Along with the code, the developer will also create separate jenkins file for every branch.
+This jenkins file will contain the stages of CI-CD, that should be performed on that branch.
+All these branches along with jenkins file will be uploaded by into the github repository.
+
+We should create a jenkins job, which will work on these branches parallely and execute the steps present in different jenkins files.
+
+
+Steps performed by the developer
+------------------------------------
+
+
+$ mkdir  multibranch
+$ cd multibranch
+
+Download the files  of maven repository
+$ git clone https://github.com/sunildevops77/maven.git
+
+Remove the hidden folder
+$ cd maven
+
+$ rm -rf  .git ( Will break the link  to maven repository )
+
+$ git init  ( create a new working directory )
+$ git status
+$ git add .
+$ git commit  -m "a"
+$ git log
+
+Developer creates branch
+$ git checkout -b loans
+$ git log   
+$ git checkout master
+$ ls
+
+Make changes to the jenkins file
+$ vim Jenkinsfile   
+( Lets make it only two stages )
+
+node('master')
+
+{
+
+stage('ContinuousDownload_master')
+         {
+    git 'https://github.com/sunildevops77/maven.git'
+        }
+
+stage('Continuousbuild_master')
+         {
+   sh label: '', script: 'mvn package'
+        }
+
+}
+
+:wq
+(Onservation, we have done the changes in master branch )
+
+$ git add .
+$ git commit  -m "b"
+
+$ git checkout  loans
+$  ls
+$ vim Jenkinsfile   
+( Lets make it only two stages )
+
+node('master')
+
+{
+
+stage('ContinuousDownload_loans')
+         {
+    git 'https://github.com/sunildevops77/maven.git'
+        }
+
+stage('Continuousbuild_loans')
+         {
+   sh label: '', script: 'mvn package'
+        }
+
+}
+
+:wq
+
+$ git add .
+$ git commit  -m "c"
+
+Observe ( master branch is having jenkins file.
+                  Loans branch is having jenkins file )
+$ git checkout master
+
+
+Create new repository  in github
+--------------------------------------
+Repository name -  Jenkins_multiBranch24
+
+$ git remote add origin https://github.com/sunildevops77/Jenkins_multiBranch.git
+$ git push -u origin --all   ( as we want to push all branches )
+
+( Check the remote repository )
+
++++This is developers activity+++++++++
+
+
+
+
+Login to jenkins
+New item -- MultiBranchPipeline
+Select multibranch Pipeline
+Branch Sources
+Add source
+Git
+Project Repository --  https://github.com/sunildevops77/Jenkins_multiBranch24.git
+
+Scan multiline pipeline triggers
+Check periodically if not otherwise
+Interval - 1 minute
+
+Apply --- Save  
+
+By this time it will be started.
+This job will check github every minute.
+
+Select multibranch pipeline
+You will find two branches
+
+Select loans , we can see two stages
+Select master , we can see two stages
+
+Lets say, developer will make changes and push to the repostitory
+
+$ vim README.md  ( Make some changes )
+$ git add .
+$ git commit -m "d"
+
+Similarly, lets repeat  in loans branch
+
+$ git checkout loans
+$ vim README.md   ( Make some changes )
+$ git add .
+$ git commit -m "e"
+
+$ git checkout master
+
+To push all the branches
+$ git push -u origin --all 
+
+Observation: Job will start automatically.
+
+
+++++++++++++++++++++++++++++++++++++++++++

@@ -1,0 +1,91 @@
+What is vulnerability
+What is maven global server?
+What is Maven local repository.
+
+
+What is Maven?
+  It is product of apache.
+All the open source communities  like  Jenkins, tomcat, mysql etc upload their updated API's into maven global server ( search.maven.org )
+
+
+
+Developers  connect to  the maven global server, download those
+ API  that are necessary for the project development and store them in  Maven local repository.
+
+
+All  developers connect   to  maven local repository and perform the development activity.
+
+
+In this way, the code is stored separately in github. and API's required for code development are stored in maven local repository.
+
+This will help in protecting the code from any threats/viruses that might be present in the  API's.
+
+Maven  is also a build tool. Where it can compile the programs and create a artifact.
+
++++++++++++++++++++++++++++++
+Configure Maven
+
+
+
+In google  --  jdk 1.8 download
+Download  and Install
+
+Where jdk is installed?
+
+
+C:\Program Files\Java\jdk1.8.0_291
+
+
+
+Copy the path of jdk
+
+
+This PC --> properties -- Advanced system settings --> advanced tab---> Environment variables --> system variables -- new
+
+
+
+Variable name - JAVA_HOME
+Variable value - C:\Program Files\Java\jdk1.8.0_291
+Ok 
+
+
++++++++++++++++
+Now, go to "path" variable --- Edit  -- click on new button
+C:\Program Files\Java\jdk1.8.0_291\bin
+
+
+Ok  
+
+
+
+++++++++++++
+
+Download apache  Maven
+In files section
+download  bin.zip  version  and extract
+
+++++++++++++++++++
+Again, create new environment variable
+
+Variable name - M2_HOME
+Variable value - C:\Users\admin\Downloads\apache-maven-3.8.1
+
+
+Ok 
+
+Now, go to "path" variable --- Edit  -- click on new button
+C:\Users\admin\Downloads\apache-maven-3.8.1\bin
+
+
+
+
+
+Ok  --> Ok
+
+
+
+How to check maven is configured or not?
+Open command prompt
+>  mvn  --version
+
+++++++++++++++

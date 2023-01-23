@@ -1,0 +1,181 @@
++++++++++++
+What is an artifact?
+What is maven number?
+What is groupid   ( is noting but project structure )
+
+
+Steps to create a maven project
+
+Command to create maven project
+> mvn  archetype:generate
+
+
+
+Choose a number or apply filter:  
+
+Note: Type of the project is dependent on the above number
+1740  --  For Spring project
+1720  --  For sample maven project
+1244 --  MVC 4 Web application
+2630 --  Project for multiple platforms web, Android and iOS
+
+
+
+Lets select the default number: 1593  -ENter default number - It will take time
+
+
+Now, we need to choose the version
+Lets take the default one 8
+
+
+
+Now, Define value for group id
+
+
+What is groupid
+Is used to  follow a project structure
+
+ex:
+For commercial application -- Ex:  com.<project_name>
+For government application -- Ex:  gov.<project_name>
+For organization application -- Ex:  org.<project_name>
+
+
+
+
+Define the value for groupID: com.uber
+
+
+What is  Artifactid: webappuber      ( With this name artifcat will be created )
+
+We get  BUILD SUCCESS message
+
+
+
+
+In which location project is created?
+In that location, we find src folder and pom.xml file
+
+
+
+
+src contains two folders.
+main and test
+
+
+
+
+
+Code created by the developer will be in main folder.
+Code created by the developer for unit testing will be in test folder.
+
+
+
+
+POM  --  stands for project  Object model. 
+It is an xml file, which will store all the external API information.
+
+
+
+
+
+++++++++++++++++++++++++
+
+
+Open gitbash
+change directory to webappuber
+$ git init
+$ git status
+$ git add .
+$ git commit -m "first commit"
+
++++++++++++++++++++++
+https://search.maven.org/   --  maven global  server
+
+Developer will search for the required API  here 
+Ex: 
+1) search for mysql  ( select the required API )  - select version
+copy the dependency tag and paste in pom.xml
+
+2) search for google  map
+copy the dependency tag and paste in pom.xml
+
+
+Now, we need to download the API from Maven Global server to Maven local repository.
+ Open command prompt  
+ >  cd  webappuber
+ > mvn compile
+
+Maven local repository is created with the name  .m2
+
++++++++++++
+Open git bash
+Go to working dire
+$ git status
+$ git add .
+$ git commit -m "second commit"
+
+++++++++++++++
+Notes:  Adding 3rd party API to pom.xml file.
+
++++++++++++++++++++
+Observe the folder structure created in the maven project ( webappuber )
+We can find the folder structure as mentioned in "groupid"
+
+They have given sample java Project.
+Copy code in App.java, lets create a new  java file, save as Sample.java  ( change class name also) 
+
+
+code
+---------
+package com.durga;
+
+/**
+ * Hello world!
+ *
+ */
+public class Sample
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello Durgasoft" );
+    }
+}
+
++++++++++++++++++++
+
+Now, we need to compile the java files  
+In command prompt
+> mvn compile
+
+Observation:
+A new folder target is created in webappdurga, we can see the class files.
+
++++++++++++++++++
+Similarly
+goto src/test/java/com/durga
+create  another java file with the name SampleTest.java
+
+Add one line of code at the end  ( for our reference )
+System.out.println("Testing Passed");
+
++++++++++++++++
+Now, we need to convert the unit testing code into .class file, for that we have command 
+
+> mvn test
+
+++++++++++++++++
+Observation:
+In folder target , test-classes will be created , which contains .class files
+
++++++++++++++++++
+To create Artifact
+
+> mvn  package
+
+Where is the location of the artifact?
+
+
+
+++++++++++++++
+

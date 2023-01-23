@@ -1,0 +1,129 @@
+Email Integration
+-----------------------
+In case, if a job fails , we need to send notificiation.
+For that we need to integrate jenkins to smtp server.
+
+We are now integrating jenkins with gmail smtp server.
+
+Search in google "gmail smtp server"
+SMTP server:  smtp.gmail.com
+Port: 465
+
+sunildevops77@gmail.com
+
++++++++++++++
+Manage Jenkins --- Configure System
+Email Notification
+
+SMTP Server - smtp.gmail.com
+Click on Advance button ( with notepad icon )
+
+USE SMTP Authentication
+
+Username - sunildevops77@gmail.com
+Password - password for the above email
+
+use SSL
+SMTP Port - 465
+
+Test Configuration by sending e-mail.
+
+Test email Receipent - sunildevops77@gmail.com
+
+( We should get success message )
+
+-----------------------------
+Gmail Settings to get email from jenkins
+
+1) Goto google account -- Less secure app access --- Allow less secure apps: ON
+
+2) "Disable captcha gmail"
+Search in google "Disable captcha gmail" -- Continue
+
++++++++++++++++++++++++++++++++
+Its time to test
+
+Create a new job in jenkins ---- with a simple echo statement.-- Link email in new job --- It will run successfully.
+
+Post Build Actions Tab,  we have email notification
+
+Wantedly make an error, we get email triggered.
+
+++++++++++++++++++++++++++++++++++++++++++
+Build Periodically
+To build the job periodically
+We use cron job format
+
+We need to give 5 values                      30 21 * * *
+Min  -   0-59
+hour -   0-23
+dom  -   1-31
+month -  1-12
+dow -    0-6
+
+Lets say you want to run the job every day at 9:30 PM
+
+30 21 * * *
+
+
+
+
+
+Lets say you want to run the job every day at 9:30 PM from Mon to Friday
+
+30 21 * * 1-5
+
+To run the job every minute
+
+* * * * *
+
+-----------------
+Under scoure code management tab
+Build Triggers --- Build periodically
+
+Schedule - 
+
+----------------------------
+
+Waiting for the approval from delivery head
+------------------
+
+node('master')
+
+{
+
+stage('Continuous Download') 
+   
+	 {
+	
+    git 'https://github.com/sunildevops77/maven.git'
+    
+	}
+
+stage('Continuous build') 
+   
+	 {
+	
+   sh label: '', script: 'mvn package'
+	}
+
+stage('Continuous Deployment') 
+   
+	 {
+	
+ sh label: '', script: 'scp  /home/ubuntu/.jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war  ubuntu@172.31.47.36:/var/lib/tomcat8/webapps/qaenv.war'
+	}
+stage('Continuous Testing') 
+   
+	 {
+	sh label: '', script: 'echo "Testing Passed"'
+	}
+stage('Continuous Delivery') 
+   
+	 {
+
+	input 'Waiting for Approval'
+
+	sh label: '', script: 'scp  /home/ubuntu/.jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war  ubuntu@172.31.40.134:/var/lib/tomcat8/webapps/prodenv.war'
+	}
+}

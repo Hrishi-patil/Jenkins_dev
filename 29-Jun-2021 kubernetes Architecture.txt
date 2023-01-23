@@ -1,0 +1,250 @@
+Kubernetes
+------------------------
+
+Google created this kubernetes.
+It is a opensource tool.
+Pre-requisite is docker.
+
+k8s  -- 8 letters between  k  and  s
+
+It is a container orchestration tool.
+ 
+Kubernetes creates cluster, deploy and manage clusters.
+
+By using kubernetes we form a cluster
+K8S schedules, runs and managers isolated containers.
+
+Convert isolated containers running on different hardwares into a cluster.
+
+In AWS we have a service EKS  ( Elastic kuberneters service )
+
+Features of kubernetes
+---------------------------------
+1) Orchestration (  clustering any no of containers on different hardwares)
+2) Auto scaling
+3) Auto healing ( new containers in place of crashed containers 
+                              similar to handling failover scenarios in docker swarm )
+4) load balancing
+5) rollback  ( going to previous versions )
+
+
+Kubernetes Architecture
+-------------------------------
+
+Cluster is combination of 1 master and multiple nodes.
+
+Pod is atomic unit of deployment in kubernetes.
+
+
+Pod consists of one or more docker containers.
+Pod runs on node.
+Node is controlled by Kubernets master
+
+
+Kubernetes does not understand containers.
+Kubernetes can understand only pods.
+
+
+In this diagram , we have one master and one node.
+node is also called minion.
+Kubernetes master is also called as control plane.
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+Con Orches				Containerization
+-----------				------------------
+Dockerswarm    ---------------------------->  Docker
+Kubernetes   ------------------------------- Docker  / XYZ
+
+
+
+
+
+
+Master contains 4 components/ services
+1) kube api server
+2) kube scheduler
+3) controller manager ( acutal state = desired state )
+4) ectd  
+
+
+
+As a devops engineer  you create a yaml file  ( .yml )   file 
+
+
+What this yaml file contains?
+
+1) No of nodes you want?
+2) Each node should have  how many pods
+3) Each pod should contain  how many containers
+
+
+All the above information will be available in yaml file.
+This file is also called manifest file.
+
+This document should be provided to kuberneted master.
+
++++++++++
+kube api server acts like a receptionist.
+It receives the yaml file and pass the request to kube scheduler.
+
+++++++++
+kube scheduler will take the action.
+So kube scheduler will create pods and containers.
+
+++++++++
+
+What is etcd?
+Etcd is also called cluster store.
+It has the information of the complete cluster.
+
+It is used to store the data of master, node and containers.
+Data is stored in key-value pair.
+
++++++++++++
+What is controller manager?
+It is responsibile to make sure that the actual state is same as desired state.
+
+These four components together called as control plane.
+
+
+++++++++++
+
+
+
+
+Kubernetes node
+---------------
+
+Node container 3 components
+1) kubelet
+2) kube-proxy
+3) container engine
+
+Kubelet  -- is also called as agent, as it listenes to kubernetes master.
+                   kube-scheduler  component communicates to  kubelet.
+
+	kubelet  communicates to container engine ( docker ) so that containers
+                 are created. 
+                Note: Containers are created in pods
+
+
+
+
+
+
+kube proxy  -- 
+	It will provide IP Address to pod.
+
++++++++++++++++++++++++++++
+
+Kubernetes Terminology
+------------------------
+
+In docker Swarm,  Manager machine takes the load.
+
+
+
+
+In Kubernetes Manager is called as Master.
+
+
+Kubernetes master does not take up the load. 
+
+
+It only distributes load to slaves/ nodes.
+
+Nodes are also called Minion.
+Minions combined together is called as cluster.
+
+Smallest Object that kubernetes can create is pod.
+
+Within the pod, we have the container.
+
+Kubernetes commands are always triggered using kubectl.
+
+Kubernetes introduced on June 2014 by Google.
+
+To practice Kubernetes on AWS , we have a service EKS ( Elastic Kubernetes Service )
+To practice Kubernetes on Azure , we have a service AKS ( Azure Kubernetes Service )
+To practice Kubernetes on GCP , we have a service GKE ( google Kubernetes engine )
+
+AWS, is expensive
+Freeways to work on kubernetes is katakoda
+Goto https://www.katacoda.com/  
+Learn --- --- Kubernetes Introduction -- Start Course
+-- Launch Multinode cluster  -- Start Scenario
+
+Login using gmail
+
+Step 1: Initialise Master
+Run kubeadm init command ( just click on it )
+
+We need to copy configuration files to home directory and change ownership.
+
+Run sudo cp command.
+
+Continue
+
+Step 2: Deploy Container networking Interface
+Run the three commands
+cat  , kubectl  apply, kubectl  get pod
+
+Continue
+
+Step 3:  
+Run
+kubeadm  token list
+
+kubeadm join   ( this will create slave )
+
+Continue
+Step 4: 
+Run
+kbectl  get nodes
+You can see one controlplane and one node
+
+We have one more site
+https://labs.play-with-k8s.com/
+
+using which we can practice  Kubernetes.
+
+But, both the options will be slow.
+
+++++++++++++++++++++++++++++++++
+We learn kuberntes on GCP, as AWS is expensive.
+
+Sign up to GCP account using gmail credentials. ( Free trial comes with USD 300 )
+
+https://cloud.google.com/
+Sign in using gmail
+
+Click on console
+You will enter into google cloud platform console
+Navigation Menu --- Kubernetes Engine --  Clusters -- Create cluster --  Create
+
+Observation: Cluster size is 3
+By default, it creates 3 node cluster.
+
+
+Master Machine is not provided as alinux server.
+It is given as a service.
+As it is a service, it never fail.
+So, we do not need to worry about master.
+
+To connect to the cluster
+-------------------------------
+In GCP, Cloud Shell is the terminal, used to connect to the cluster.
+
+kubectl get nodes    ( we can see the nodes )
+
+After practice,  Delete the cluster.
+Next day,  we can create the cluster again.
+-----------------------
+
+ 

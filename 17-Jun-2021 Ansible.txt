@@ -1,0 +1,150 @@
+Configuration Management
+-----------------------------------
+This is process of configuring remote servers from one point of control.
+
+Advantages
+----------------------
+1) Provisioning of servers
+	The applications that should be installed on server can be done very quickly from a single centralized location.
+
+2) Idempotent 
+	Configuration management tools are used to bring the server to a particular state, called as desired state. If a server already in the desired state, configuration management tools will not reconfigure that server.
+
+
+Note: Cofiguration management tools cannot be used for installing OS from the scratch.
+They can be used only for managing the applications on top of the OS.
+
+
+COnfigutaion management tools -  Ansible, chef, puppet, salt  etc
+
+
+++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+Ansible  -- It is a open source configuration management tool, created using Python.
+Main machine in which anisble is installed, is called as controller.
+Remote severs that Ansible configures, are called as managed nodes.
+
+Ansible uses agent less policy for configures remote servers ie Ansible is installed only on 1 machine, and we do not require any client side software to be installed on the remote serers.
+
+Ansible performs configuration management through password less ssh.
+
+
+
+
+++++++++++++++++++++++++++++++++++
+Create 4 Servers ( Ubuntu 18 )
+1 is controller
+3  are managed nodes
+
+Name the instances as
+Controller
+Server1
+Server2
+Server3
+
+Ubuntu machines default come with Python3
+Ansible supports Python2
+We need to downgrade the machines from python3  to Python2
+
+Connect server1
+Check the version
+
+$ python3 --version
+
+To Install Python2
+$ sudo apt-get update
+$ sudo apt-get dist-upgrade ( It will point to  older apt repository  where python2 is available)
+
+$  sudo apt-get install -y python2.7 python-pip
+
+$ sudo apt-get install python3-pip
+
+Now check the version of python
+$ python --version
+
++++++++++++++++++++++++++
+Establish password less ssh connection
+
+$ sudo passwd ubuntu
+( lets give the password as ubuntu only )
+
+$ sudo vim /etc/ssh/sshd_config
+
+change 
+PasswordAuthentication yes
+Save and QUIT
+
+$ sudo service ssh restart
+$ exit
+
+++++++++++++++++++
+
+Repeat the same steps in server2 and server3
+
+++++++++++++++++
+Now,  Connect to controller
+Even in controller also  python2  version should be available
+
+(So, run the same commands)
+
+$ sudo apt-get update
+$ sudo apt-get dist-upgrade
+
+$  sudo apt-get install -y python2.7 python-pip
+
+Now check the version of python
+$ python --version
+
++++++++++++++++++++
+Now , We need to generate ssh connections
+
+$ ssh-keygen
+
+Now copy the key to managed nodes
+
+$ ssh-copy-id ubuntu@172.31.0.98   ( private Ip of server1 )
+
+$ ssh-copy-id ubuntu@172.31.1.183  ( private Ip of server2 )
+
+$ ssh-copy-id ubuntu@172.31.14.179  ( private Ip of server3 )
+
++++++++++++++++++++++
+Installing ansible now
+
+Connect to controller.
+
+$ sudo apt-get install software-properties-common
+(  software-properties-common    ,  is a base package which is required to install ansible )
+
+$ sudo apt-add-repository ppa:ansible/ansible
+
+$ sudo apt-get update
+
+$ sudo apt-get install -y ansible
+
++++++++++++++++++
+To check ther version of ansible
+
+$ ansible --version
+
+++++++++++++
+Write the ip address of nodes in the inventory file
+
+$ cd /etc/ansible
+$ ls
+
+$ sudo vim hosts
+
+insert the private ip addresss of 3 servers
+save and quit
+
+$ ls -la     ( to see the list in the current machine )
+$ ansible all  -a  'ls  -la'    ( you will get the list of the files in all managed nodes )
+
+
